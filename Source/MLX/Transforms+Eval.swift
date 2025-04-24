@@ -3,13 +3,18 @@
 import Cmlx
 import Foundation
 
+/// lock to be held while doing any eval or asyncEval
+let evalLock = NSLock()
+
 /// Evaluate one or more `MLXArray`
 ///
 /// ### See Also
 /// - <doc:lazy-evaluation>
 public func eval(_ arrays: MLXArray...) {
     let vector_array = new_mlx_vector_array(arrays)
-    mlx_eval(vector_array)
+    _ = evalLock.withLock {
+        mlx_eval(vector_array)
+    }
     mlx_vector_array_free(vector_array)
 }
 
@@ -19,7 +24,9 @@ public func eval(_ arrays: MLXArray...) {
 /// - <doc:lazy-evaluation>
 public func eval(_ arrays: [MLXArray]) {
     let vector_array = new_mlx_vector_array(arrays)
-    mlx_eval(vector_array)
+    _ = evalLock.withLock {
+        mlx_eval(vector_array)
+    }
     mlx_vector_array_free(vector_array)
 }
 
@@ -30,7 +37,9 @@ public func eval(_ arrays: [MLXArray]) {
 /// - ``asyncEval(_:)-6j4zg``
 public func asyncEval(_ arrays: [MLXArray]) {
     let vector_array = new_mlx_vector_array(arrays)
-    mlx_async_eval(vector_array)
+    _ = evalLock.withLock {
+        mlx_async_eval(vector_array)
+    }
     mlx_vector_array_free(vector_array)
 }
 

@@ -48,19 +48,10 @@ public func metalKernel(
     source: String, header: String = "",
     ensureRowContiguous: Bool = true,
     atomicOutputs: Bool = false,
-    template: [(String, KernelTemplateArg)]? = nil,
-    grid: (Int, Int, Int),
-    threadGroup: (Int, Int, Int),
-    outputShapes: [[Int]],
-    outputDTypes: [DType],
-    initValue: Float? = nil,
-    verbose: Bool = false
 ) -> MLXFast.MLXFastKernel {
     return MLX.MLXFast.metalKernel(
-        name: name, inputNames: inputNames, outputNames: outputNames, source: source,
-        header: header,
-        ensureRowContiguous: ensureRowContiguous, atomicOutputs: atomicOutputs,
-        template: template, grid: grid, threadGroup: threadGroup, outputShapes: outputShapes,
-        outputDTypes: outputDTypes,
-        initValue: initValue, verbose: verbose)
+        name: name, inputNames: inputNames, outputNames: outputNames,
+        source: source, header: header,
+        ensureRowContiguous: ensureRowContiguous, atomicOutputs: atomicOutputs
+    )
 }
