@@ -48,7 +48,7 @@ extension MLXFast {
             name: String, inputNames: [String], outputNames: [String],
             source: String, header: String = "",
             ensureRowContiguous: Bool = true,
-            atomicOutputs: Bool = false,
+            atomicOutputs: Bool = false
         ) {
             self.outputNames = outputNames
 
@@ -174,7 +174,7 @@ extension MLXFast {
         name: String, inputNames: [String], outputNames: [String],
         source: String, header: String = "",
         ensureRowContiguous: Bool = true,
-        atomicOutputs: Bool = false,
+        atomicOutputs: Bool = false
     ) -> MLXFastKernel {
         MLXFastKernel(
             name: name, inputNames: inputNames, outputNames: outputNames,
