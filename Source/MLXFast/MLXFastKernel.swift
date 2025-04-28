@@ -47,7 +47,7 @@ public func metalKernel(
     name: String, inputNames: [String], outputNames: [String],
     source: String, header: String = "",
     ensureRowContiguous: Bool = true,
-    atomicOutputs: Bool = false,
+    atomicOutputs: Bool = false
 ) -> MLXFast.MLXFastKernel {
     return MLX.MLXFast.metalKernel(
         name: name, inputNames: inputNames, outputNames: outputNames,
