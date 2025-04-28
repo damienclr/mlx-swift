@@ -87,6 +87,38 @@ public func eval(_ values: [Any]) {
     eval(arrays)
 }
 
+/// Variant of ``eval(_:)-3b2g9`` that checks for errors in MLX and throws.
+///
+/// ### See Also
+/// - <doc:lazy-evaluation>
+public func checkedEval(_ values: Any...) throws {
+    var arrays = [MLXArray]()
+
+    for item in values {
+        collect(item, into: &arrays)
+    }
+
+    try withError {
+        eval(arrays)
+    }
+}
+
+/// Variant of ``eval(_:)-190w1`` that checks for errors in MLX and throws.
+///
+/// ### See Also
+/// - <doc:lazy-evaluation>
+public func checkedEval(_ values: [Any]) throws {
+    var arrays = [MLXArray]()
+
+    for item in values {
+        collect(item, into: &arrays)
+    }
+
+    try withError {
+        eval(arrays)
+    }
+}
+
 /// Evaluate one or more `MLXArray` asynchronously.
 ///
 /// This variant allows several structured types:
