@@ -3,12 +3,90 @@
 import Cmlx
 import Foundation
 
+/// Export a function to a `.mlxfn` file.
+///
+/// For example this defines a function, writes it to a file, imports
+/// it and evaluates it.
+///
+/// ```swift
+/// func f(arrays: [MLXArray]) -> [MLXArray] {
+///     [arrays[0] * arrays[1]]
+/// }
+///
+/// let x = MLXArray(1)
+/// let y = MLXArray([1, 2, 3])
+///
+/// try exportFunction(to: url, f)(x, y: y)
+///
+/// // load it back in
+/// let f2 = try importFunction(from: url)
+///
+/// let a = MLXArray(10)
+/// let b = MLXArray([5, 10, 20])
+///
+/// // call it -- the shapes and labels have to match
+/// let r = try f2(a, y: b)[0]
+/// ```
+///
+/// - Parameters:
+///   - url: file url to write the `.mlxfn` file
+///   - shapeless: if `true` the function allows inputs with variable shapes
+///   - f: the function to capture
+/// - Returns: a help that records the call
+///
+/// ### See Also
+/// - ``exportFunctions(to:shapeless:_:export:)``
+/// - ``importFunction(from:)``
 public func exportFunction(
     to url: URL, shapeless: Bool = false, _ f: @escaping ([MLXArray]) -> [MLXArray]
 ) -> FunctionExporterSingle {
     FunctionExporterSingle(url: url, shapeless: shapeless, f: f)
 }
 
+/// Export multiple traces of a function to a `.mlxfn` file.
+///
+/// For example this defines a function, writes it to a file, imports
+/// it and evaluates it.
+///
+/// ```swift
+/// func f(_ arrays: [MLXArray]) -> [MLXArray] {
+///     [arrays.dropFirst().reduce(arrays[0], +)]
+/// }
+///
+/// let x = MLXArray(1)
+///
+/// try exportFunctions(to: url, shapeless: true, f) { export in
+///     try export(x)
+///     try export(x, x)
+///     try export(x, x, x)
+/// }
+///
+/// // load it back in
+/// let f2 = try importFunction(from: url)
+///
+/// let a = MLXArray([10, 10, 10])
+/// let b = MLXArray([5, 10, 20])
+/// let c = MLXArray([1, 2, 3])
+///
+/// // r1 = a
+/// let r1 = try f2(a)[0]
+///
+/// // r2 = a + b
+/// let r2 = try f2(a, b)[0]
+///
+/// // r3 = a + b + c
+/// let r3 = try f2(a, b, c)[0]
+/// ```
+///
+/// - Parameters:
+///   - url: file url to write the `.mlxfn` file
+///   - shapeless: if `true` the function allows inputs with variable shapes
+///   - f: the function to capture
+///   - export: closure for recording the calls
+///
+/// ### See Also
+/// - ``exportFunction(to:shapeless:_:)``
+/// - ``importFunction(from:)``
 public func exportFunctions(
     to url: URL, shapeless: Bool = false, _ f: @escaping ([MLXArray]) -> [MLXArray],
     export: (FunctionExporterMultiple) throws -> Void
@@ -17,6 +95,21 @@ public func exportFunctions(
     try export(exporter)
 }
 
+/// A helper for ``exportFunction(to:shapeless:_:)``.
+///
+/// This records the call to the function and saves it to the file.
+///
+/// ```swift
+/// func f(arrays: [MLXArray]) -> [MLXArray] {
+///     [arrays[0] * arrays[1]]
+/// }
+///
+/// let x = MLXArray(1)
+/// let y = MLXArray([1, 2, 3])
+///
+/// // the (x, y: y) is calling this object
+/// try exportFunction(to: url, f)(x, y: y)
+/// ```
 @dynamicCallable
 public final class FunctionExporterSingle {
     let url: URL
@@ -54,6 +147,25 @@ public final class FunctionExporterSingle {
     }
 }
 
+/// A helper for ``exportFunctions(to:shapeless:_:export:)``.
+///
+/// This records the call to the function and saves it to the file.
+///
+/// ```swift
+/// ```swift
+/// func f(_ arrays: [MLXArray]) -> [MLXArray] {
+///     [arrays.dropFirst().reduce(arrays[0], +)]
+/// }
+///
+/// let x = MLXArray(1)
+///
+/// // the export parameter is a FunctionExporterMultiple
+/// try exportFunctions(to: url, shapeless: true, f) { export in
+///     try export(x)
+///     try export(x, x)
+///     try export(x, x, x)
+/// }
+/// ```
 @dynamicCallable
 public final class FunctionExporterMultiple {
     let exporter: mlx_function_exporter
@@ -93,10 +205,52 @@ public final class FunctionExporterMultiple {
     }
 }
 
+/// Imports a function from a `.mlxfn` file.
+///
+/// ```swift
+/// // f2 is a callable that represents the loaded function
+/// let f2 = try importFunction(from: url)
+///
+/// let a = MLXArray(10)
+/// let b = MLXArray([5, 10, 20])
+///
+/// // call it -- the shapes and labels have to match
+/// let r = try f2(a, y: b)[0]
+/// ```
+///
+/// - Parameter url: file to load from
+/// - Returns: a callable that represents the loaded function
+/// ### See Also
+/// - ``exportFunction(to:shapeless:_:)``
+/// - ``exportFunctions(to:shapeless:_:export:)``
 public func importFunction(from url: URL) throws -> ImportedFunction {
     try ImportedFunction(url: url)
 }
 
+/// Helper for ``importFunction(from:)`` -- this holds the imported function.
+///
+/// This can be called with parameters that match the recorded parameters:
+///
+/// ```swift
+/// func f(arrays: [MLXArray]) -> [MLXArray] {
+///     [arrays[0] * arrays[1]]
+/// }
+///
+/// let x = MLXArray(1)
+/// let y = MLXArray([1, 2, 3])
+///
+/// // records with unnamed first parameter and a second parameter named `y`
+/// try exportFunction(to: url, f)(x, y: y)
+///
+/// // f2 is a ImportedFunction
+/// let f2 = try importFunction(from: url)
+///
+/// let a = MLXArray(10)
+/// let b = MLXArray([5, 10, 20])
+///
+/// // call it -- the shapes and labels have to match
+/// let r = try f2(a, y: b)[0]
+/// ```
 @dynamicCallable
 public final class ImportedFunction {
 
