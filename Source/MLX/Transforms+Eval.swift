@@ -3,8 +3,10 @@
 import Cmlx
 import Foundation
 
-/// lock to be held while doing any eval or asyncEval
-let evalLock = NSLock()
+/// lock to be held while doing any eval or asyncEval.  This is
+/// a recursive lock to handle any cases where a closure might
+/// call back into eval.
+let evalLock = NSRecursiveLock()
 
 /// Evaluate one or more `MLXArray`
 ///
